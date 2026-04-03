@@ -10,6 +10,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/loading_widget.dart';
 import '../../widgets/summary_card.dart';
 import '../../widgets/transaction_tile.dart';
+import '../transactions/add_transaction_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -79,6 +80,12 @@ class HomeScreen extends StatelessWidget {
                     else
                       ...provider.transactions.take(5).map((tx) => TransactionTile(
                             transaction: tx,
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => AddTransactionScreen(transaction: tx),
+                              ),
+                            ),
                             onDelete: () => provider.deleteTransaction(tx.id),
                           )),
                   ],

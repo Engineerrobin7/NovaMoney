@@ -17,6 +17,10 @@ class Formatters {
     return DateFormat('EEE').format(date);
   }
 
+  static String shortMonthName(DateTime date) {
+    return DateFormat('MMM').format(date);
+  }
+
   static String monthYear(DateTime date) {
     return DateFormat('MMMM yyyy').format(date);
   }

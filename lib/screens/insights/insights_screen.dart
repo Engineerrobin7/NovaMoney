@@ -85,6 +85,8 @@ class _InsightsScreenState extends State<InsightsScreen> {
                   ],
                   _WeeklyComparison(provider: provider),
                   const SizedBox(height: 16),
+                  _MonthlyTrend(provider: provider),
+                  const SizedBox(height: 16),
                   _CategoryList(provider: provider),
                 ],
               ),
@@ -356,6 +358,93 @@ class _CategoryList extends StatelessWidget {
               ),
             );
           }),
+        ],
+      ),
+    );
+  }
+}
+
+class _MonthlyTrend extends StatelessWidget {
+  final TransactionProvider provider;
+  const _MonthlyTrend({required this.provider});
+
+  @override
+  Widget build(BuildContext context) {
+    final data = provider.monthlySpending;
+    final now = DateTime.now();
+    // months[0] = 5 months ago, months[5] = current month
+    final months = List.generate(6, (i) {
+      final d = DateTime(now.year, now.month - (5 - i));
+      return d;
+    });
+    final maxY = data.values.isEmpty
+        ? 100.0
+        : (data.values.reduce((a, b) => a > b ? a : b) * 1.3).clamp(10.0, double.infinity);
+
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Monthly Trend', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 140,
+            child: BarChart(
+              BarChartData(
+                maxY: maxY,
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  getDrawingHorizontalLine: (_) => FlLine(
+                    color: AppTheme.primaryColor.withValues(alpha: 0.08),
+                    strokeWidth: 1,
+                  ),
+                ),
+                borderData: FlBorderData(show: false),
+                titlesData: FlTitlesData(
+                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, _) {
+                        final idx = value.toInt();
+                        if (idx < 0 || idx >= months.length) return const SizedBox();
+                        return Text(
+                          Formatters.shortMonthName(months[idx]),
+                          style: Theme.of(context).textTheme.labelSmall,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                barGroups: List.generate(6, (i) {
+                  // data key: 0 = current month, 5 = 5 months ago
+                  // bar index 0 = oldest, 5 = current
+                  final monthOffset = 5 - i;
+                  return BarChartGroupData(
+                    x: i,
+                    barRods: [
+                      BarChartRodData(
+                        toY: data[monthOffset] ?? 0,
+                        color: i == 5
+                            ? AppTheme.primaryColor
+                            : AppTheme.primaryColor.withValues(alpha: 0.45),
+                        width: 28,
+                        borderRadius: BorderRadius.circular(6),
+                        backDrawRodData: BackgroundBarChartRodData(
+                          show: true,
+                          toY: maxY,
+                          color: AppTheme.primaryColor.withValues(alpha: 0.07),
+                        ),
+                      ),
+                    ],
+                  );
+                }),
+              ),
+            ),
+          ),
         ],
       ),
     );

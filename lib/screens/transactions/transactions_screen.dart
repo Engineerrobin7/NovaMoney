@@ -149,7 +149,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => _FilterSheet(provider: provider),
+      builder: (_) => ChangeNotifierProvider.value(
+        value: provider,
+        child: const _FilterSheet(),
+      ),
     );
   }
 }
@@ -185,11 +188,11 @@ class _FilterChip extends StatelessWidget {
 }
 
 class _FilterSheet extends StatelessWidget {
-  final TransactionProvider provider;
-  const _FilterSheet({required this.provider});
+  const _FilterSheet();
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<TransactionProvider>();
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
